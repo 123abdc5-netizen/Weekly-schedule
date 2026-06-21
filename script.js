@@ -14,8 +14,9 @@ function createCard(student, id) {
     deleteBtn.addEventListener("click", function (event) {
         event.stopPropagation();
 
-        db.collection("students").doc(id).delete();
-        card.remove();
+        db.collection("students").doc(id).delete().then(() => {
+            card.remove();
+        });
     });
 
     card.addEventListener("click", function () {
@@ -45,10 +46,9 @@ db.collection("students").get().then((snapshot) => {
     });
 });
 
-
 addButton.addEventListener("click", function () {
-    const studentName = prompt("اسم دانشجو را وارد کنید:");
 
+    const studentName = prompt("اسم دانشجو را وارد کنید:");
     if (!studentName) return;
 
     db.collection("students").add({
