@@ -1,0 +1,194 @@
+#back_ground{
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 900px;
+    width: 1300px;
+    background-color: rgb(110, 110, 110);
+    border: none;
+    border-radius: 20px;
+    margin-top: 80px;
+    margin-right: 55px;
+    padding-bottom: 50px;
+}
+
+.box_container{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-container{
+    margin-right: 300px;
+}
+
+.exam-form{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+
+.box_table_Weekly_schedule{
+    min-height: 300px;
+    width: 1200px;
+    background-color: rgb(175, 175, 175);
+    box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    border: none;
+    border-radius: 30px;
+    margin-right: 55px;
+    margin-bottom: 20px;
+}
+
+.box_table_Exam_schedule{
+    min-height: 300px;
+    width: 1200px;
+    background-color: rgb(175, 175, 175);
+    border: none;
+    border-radius: 30px;
+    margin-right: 55px;
+    margin-top: 20px;
+}
+
+h1{
+    font-size: 25px;
+    font-family:Tahoma;
+    text-align: center;
+}
+
+table{
+    width: 50%;
+    margin: 30px auto;
+    border-collapse: collapse;
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th, td{
+    border: none;
+    border: 1px solid  #e5e7eb;
+    padding: 12px;
+    text-align: center;
+}
+
+th{
+    background-color: #2563eb;
+    color: rgb(255, 249, 249);
+    font-weight: bold;
+}
+
+tr{
+    background-color: white;
+}
+
+tr:hover{
+    background-color: #f8fafc;
+}
+
+tr:nth-child(even){
+    background-color: #d4d4d4;
+}
+
+.deleteLesson,
+.deleteExam{
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.deleteLesson:hover,
+.deleteExam:hover{
+    transform: scale(1.2);
+}
+
+.student-profile-image{
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-img{
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-left: 10px;
+}
+
+.student-header{
+    display: flex;
+    align-items: center;
+    gap: 0px;
+    margin-right: -50px;
+}
+
+.student-info{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    margin-left: -30px;
+    text-align: right;
+    align-items: flex-start;
+}
+
+#student-title{
+    margin: 0;
+    text-align: right;
+}
+
+#student-major{
+    margin: 0;
+    font-size: 18px;
+    text-align: right;
+}
+
+.image-section{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.university-info{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0px;
+
+}
+
+.university-logo{
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+}
+
+.university-name{
+    margin-top: 5px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.top-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 20px 40px;
+    box-sizing: border-box;
+    direction: ltr;
+}
+
+.university-info{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

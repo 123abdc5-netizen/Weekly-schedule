@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>صفحه دانشجو</title>
+    <link rel="stylesheet" href="student_information.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body dir="rtl">
+    <div class="box_container">
+        <div id="back_ground">
+            <div class="top-header">
+                <div class="university-info">
+                    <img src="daneshgah_elmi_karbordi3.png" class="university-logo">
+                    <p class="university-name">دانشگاه جامع علمی کاربردی</p>
+                </div>
+                <div class="student-header">
+                    <div class="student-info">
+                        <h1 id="student-title"></h1>
+                        <p id="student-major">رشته: کامپیوتر</p>
+                        <p id="student-major">درس: برنامه سازی تحت وب</p>
+                        <p id="student-major">استاد : فاطمه کاظمی</p>
+                    </div>
+                    <div class="image-section">
+                        <img id="studentImage"src="default.png"class="student-profile-image">
+                        <input type="file"id="imageInput"accept="image/*">
+                    </div>
+                </div>
+            </div>
+            <div class="box_table_Weekly_schedule"><h1>برنامه هفتگی</h1>
+                <div class="form-container">
+
+                    <select id="day">
+                        <option>شنبه</option>
+                        <option>یکشنبه</option>
+                        <option>دوشنبه</option>
+                        <option>سه شنبه</option>
+                        <option>چهارشنبه</option>
+                        <option>پنجشنبه</option>
+                        <option>جمعه</option>
+                    </select>
+
+                    <input type="text" id="time" placeholder="ساعت">
+
+                    <input type="text" id="lesson" placeholder="نام درس">
+
+                    <input type="text" id="teacher" placeholder="نام استاد">
+
+                    <button id="addLesson">افزودن</button>
+
+                </div>
+                <table id="scheduleTable">
+                    <tr>
+                        <th>روز</th>
+                        <th>ساعت</th>
+                        <th>درس</th>
+                        <th>نام استاد</th>
+                        <th>حذف</th>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="box_table_Exam_schedule"><h1>امتحانات</h1>
+                <div class="exam-form">
+
+                    <input type="text" id="examLesson" placeholder="نام درس">
+
+                    <input type="text" id="examDate" placeholder="تاریخ">
+
+                    <input type="text" id="examTime" placeholder="ساعت">
+
+                    <input type="text" id="examteacher" placeholder="نام استاد">
+
+                    <button id="addExam">افزودن امتحان</button>
+
+                </div>
+
+                <table id="examTable">
+
+                    <tr>
+                        <th>درس</th>
+                        <th>تاریخ</th>
+                        <th>ساعت</th>
+                        <th>نام استاد</th>
+                        <th>حذف</th>
+                    </tr>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const addLessonBtn = document.getElementById("addLesson");
+    const table = document.getElementById("scheduleTable");
+
+    const addExamBtn = document.getElementById("addExam");
+    const examTable = document.getElementById("examTable");
+
+    const studentName = localStorage.getItem("selectedStudent");
+
+    let students = JSON.parse(localStorage.getItem("students")) || [];
+
+    let currentStudent = students.find(function(student)
+    {
+        return student.name === studentName;
+    });
+
+    const imageInput = document.getElementById("imageInput");
+    const studentImage = document.getElementById("studentImage");
+
+    if (currentStudent.image)
+    {
+        studentImage.src = currentStudent.image;
+    }
+
+    document.getElementById("student-title").innerText =
+        "دانشجو: " + studentName;
+
+
+    for (let lessonInfo of currentStudent.schedule)
+    {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${lessonInfo.day}</td>
+            <td>${lessonInfo.time}</td>
+            <td>${lessonInfo.lesson}</td>
+            <td>${lessonInfo.teacher || "-"}</td>
+            <td><button class="deleteLesson">✖</button></td>
+        `;
+
+        table.appendChild(row);
+
+        const deleteBtn = row.querySelector(".deleteLesson");
+
+        deleteBtn.addEventListener("click", function ()
+        {
+            currentStudent.schedule =
+                currentStudent.schedule.filter(function(item)
+                {
+                    return !(
+                        item.day === lessonInfo.day &&
+                        item.time === lessonInfo.time &&
+                        item.lesson === lessonInfo.lesson &&
+                        item.teacher === lessonInfo.teacher
+                    );
+                });
+
+            localStorage.setItem(
+                "students",
+                JSON.stringify(students)
+            );
+
+            row.remove();
+        });
+    }
+
+
+    for (let examInfo of currentStudent.exams)
+    {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${examInfo.lesson}</td>
+            <td>${examInfo.date}</td>
+            <td>${examInfo.time}</td>
+            <td>${examInfo.teacher || "-"}</td>
+            <td><button class="deleteExam">✖</button></td>
+        `;
+
+        examTable.appendChild(row);
+
+        const deleteBtn = row.querySelector(".deleteExam");
+
+        deleteBtn.addEventListener("click", function ()
+        {
+            currentStudent.exams =
+                currentStudent.exams.filter(function(item)
+                {
+                    return !(
+                        item.lesson === examInfo.lesson &&
+                        item.date === examInfo.date &&
+                        item.time === examInfo.time &&
+                        item.teacher === examInfo.teacher
+                    );
+                });
+
+            localStorage.setItem(
+                "students",
+                JSON.stringify(students)
+            );
+
+            row.remove();
+        });
+    }
+
+
+
+    addLessonBtn.addEventListener("click", function ()
+    {
+        const day = document.getElementById("day").value;
+        const time = document.getElementById("time").value;
+        const lesson = document.getElementById("lesson").value;
+        const teacher = document.getElementById("teacher").value;
+
+        if (time.trim() === "" || lesson.trim() === "")
+        {
+            alert("لطفاً ساعت و نام درس را وارد کنید.");
+            return;
+        }
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${day}</td>
+            <td>${time}</td>
+            <td>${lesson}</td>
+            <td>${teacher}</td>
+            <td><button class="deleteLesson">✖</button></td>
+        `;
+
+        table.appendChild(row);
+
+        const deleteBtn = row.querySelector(".deleteLesson");
+
+        deleteBtn.addEventListener("click", function ()
+        {
+            currentStudent.schedule =
+                currentStudent.schedule.filter(function(item)
+                {
+                    return !(
+                        item.day === day &&
+                        item.time === time &&
+                        item.lesson === lesson&&
+                        item.teacher === teacher
+                    );
+                });
+
+            localStorage.setItem(
+                "students",
+                JSON.stringify(students)
+            );
+
+            row.remove();
+        });
+
+        currentStudent.schedule.push({
+            day: day,
+            time: time,
+            lesson: lesson,
+            teacher: teacher
+        });
+
+        localStorage.setItem(
+            "students",
+            JSON.stringify(students)
+        );
+    });
+
+
+    addExamBtn.addEventListener("click", function ()
+    {
+        const lesson = document.getElementById("examLesson").value;
+        const date = document.getElementById("examDate").value;
+        const time = document.getElementById("examTime").value;
+        const teacher = document.getElementById("examteacher").value;
+
+        if (
+            lesson.trim() === "" ||
+            date.trim() === "" ||
+            time.trim() === "" ||
+            teacher.trim() === ""
+        )
+        {
+            alert("همه فیلدها را پر کنید");
+            return;
+        }
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${lesson}</td>
+            <td>${date}</td>
+            <td>${time}</td>
+            <td>${teacher}</td>
+            <td><button class="deleteExam">✖</button></td>
+        `;
+
+        examTable.appendChild(row);
+
+        const deleteBtn = row.querySelector(".deleteExam");
+
+        deleteBtn.addEventListener("click", function ()
+        {
+            currentStudent.exams =
+                currentStudent.exams.filter(function(item)
+                {
+                    return !(
+                        item.lesson === lesson &&
+                        item.date === date &&
+                        item.time === time &&
+                        item.teacher === teacher
+                    );
+                });
+
+            localStorage.setItem(
+                "students",
+                JSON.stringify(students)
+            );
+
+            row.remove();
+        });
+
+        currentStudent.exams.push({
+            lesson: lesson,
+            date: date,
+            time: time,
+            teacher: teacher
+        });
+
+        localStorage.setItem(
+            "students",
+            JSON.stringify(students)
+        );
+    });
+
+    imageInput.addEventListener("change", function ()
+    {
+        const file = imageInput.files[0];
+
+        if (!file)
+        {
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function ()
+        {
+            studentImage.src = reader.result;
+
+            currentStudent.image = reader.result;
+
+            localStorage.setItem(
+                "students",
+                JSON.stringify(students)
+            );
+        };
+
+        reader.readAsDataURL(file);
+    });
+</script>
+
+</body>
+</html>
