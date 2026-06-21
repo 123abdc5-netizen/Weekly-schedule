@@ -5,6 +5,9 @@
     <title>صفحه دانشجو</title>
     <link rel="stylesheet" href="student_information.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase.js"></script>
 </head>
 <body dir="rtl">
     <div class="box_container">
@@ -91,265 +94,183 @@
     </div>
 
 <script>
-    const addLessonBtn = document.getElementById("addLesson");
-    const table = document.getElementById("scheduleTable");
+const studentId = localStorage.getItem("selectedStudent");
 
-    const addExamBtn = document.getElementById("addExam");
-    const examTable = document.getElementById("examTable");
+let currentStudent = null;
 
-    const studentName = localStorage.getItem("selectedStudent");
 
-    let students = JSON.parse(localStorage.getItem("students")) || [];
+const table = document.getElementById("scheduleTable");
+const examTable = document.getElementById("examTable");
 
-    let currentStudent = students.find(function(student)
-    {
-        return student.name === studentName;
-    });
+const addLessonBtn = document.getElementById("addLesson");
+const addExamBtn = document.getElementById("addExam");
 
-    const imageInput = document.getElementById("imageInput");
-    const studentImage = document.getElementById("studentImage");
+const imageInput = document.getElementById("imageInput");
+const studentImage = document.getElementById("studentImage");
 
-    if (currentStudent.image)
-    {
-        studentImage.src = currentStudent.image;
-    }
+
+db.collection("students").doc(studentId).get().then((doc) => {
+    currentStudent = doc.data();
 
     document.getElementById("student-title").innerText =
-        "دانشجو: " + studentName;
+        "دانشجو: " + currentStudent.name;
+
+    studentImage.src = currentStudent.image || "default.png";
+
+    loadSchedule();
+    loadExams();
+});
 
 
-    for (let lessonInfo of currentStudent.schedule)
-    {
+
+function loadSchedule() {
+    table.innerHTML = `
+        <tr>
+            <th>روز</th>
+            <th>ساعت</th>
+            <th>درس</th>
+            <th>استاد</th>
+            <th>حذف</th>
+        </tr>
+    `;
+
+    currentStudent.schedule.forEach((item, index) => {
         const row = document.createElement("tr");
 
         row.innerHTML = `
-            <td>${lessonInfo.day}</td>
-            <td>${lessonInfo.time}</td>
-            <td>${lessonInfo.lesson}</td>
-            <td>${lessonInfo.teacher || "-"}</td>
+            <td>${item.day}</td>
+            <td>${item.time}</td>
+            <td>${item.lesson}</td>
+            <td>${item.teacher}</td>
             <td><button class="deleteLesson">✖</button></td>
         `;
 
-        table.appendChild(row);
+        row.querySelector(".deleteLesson").addEventListener("click", function () {
+            currentStudent.schedule.splice(index, 1);
 
-        const deleteBtn = row.querySelector(".deleteLesson");
-
-        deleteBtn.addEventListener("click", function ()
-        {
-            currentStudent.schedule =
-                currentStudent.schedule.filter(function(item)
-                {
-                    return !(
-                        item.day === lessonInfo.day &&
-                        item.time === lessonInfo.time &&
-                        item.lesson === lessonInfo.lesson &&
-                        item.teacher === lessonInfo.teacher
-                    );
-                });
-
-            localStorage.setItem(
-                "students",
-                JSON.stringify(students)
-            );
+            db.collection("students").doc(studentId).update({
+                schedule: currentStudent.schedule
+            });
 
             row.remove();
         });
-    }
+
+        table.appendChild(row);
+    });
+}
 
 
-    for (let examInfo of currentStudent.exams)
-    {
+
+function loadExams() {
+    examTable.innerHTML = `
+        <tr>
+            <th>درس</th>
+            <th>تاریخ</th>
+            <th>ساعت</th>
+            <th>استاد</th>
+            <th>حذف</th>
+        </tr>
+    `;
+
+    currentStudent.exams.forEach((item, index) => {
         const row = document.createElement("tr");
 
         row.innerHTML = `
-            <td>${examInfo.lesson}</td>
-            <td>${examInfo.date}</td>
-            <td>${examInfo.time}</td>
-            <td>${examInfo.teacher || "-"}</td>
+            <td>${item.lesson}</td>
+            <td>${item.date}</td>
+            <td>${item.time}</td>
+            <td>${item.teacher}</td>
             <td><button class="deleteExam">✖</button></td>
         `;
 
-        examTable.appendChild(row);
+        row.querySelector(".deleteExam").addEventListener("click", function () {
+            currentStudent.exams.splice(index, 1);
 
-        const deleteBtn = row.querySelector(".deleteExam");
-
-        deleteBtn.addEventListener("click", function ()
-        {
-            currentStudent.exams =
-                currentStudent.exams.filter(function(item)
-                {
-                    return !(
-                        item.lesson === examInfo.lesson &&
-                        item.date === examInfo.date &&
-                        item.time === examInfo.time &&
-                        item.teacher === examInfo.teacher
-                    );
-                });
-
-            localStorage.setItem(
-                "students",
-                JSON.stringify(students)
-            );
+            db.collection("students").doc(studentId).update({
+                exams: currentStudent.exams
+            });
 
             row.remove();
         });
+
+        examTable.appendChild(row);
+    });
+}
+
+
+
+addLessonBtn.addEventListener("click", function () {
+    const day = document.getElementById("day").value;
+    const time = document.getElementById("time").value;
+    const lesson = document.getElementById("lesson").value;
+    const teacher = document.getElementById("teacher").value;
+
+    if (!time || !lesson) {
+        alert("ساعت و درس را وارد کنید");
+        return;
     }
 
-
-
-    addLessonBtn.addEventListener("click", function ()
-    {
-        const day = document.getElementById("day").value;
-        const time = document.getElementById("time").value;
-        const lesson = document.getElementById("lesson").value;
-        const teacher = document.getElementById("teacher").value;
-
-        if (time.trim() === "" || lesson.trim() === "")
-        {
-            alert("لطفاً ساعت و نام درس را وارد کنید.");
-            return;
-        }
-
-        const row = document.createElement("tr");
-
-        row.innerHTML = `
-            <td>${day}</td>
-            <td>${time}</td>
-            <td>${lesson}</td>
-            <td>${teacher}</td>
-            <td><button class="deleteLesson">✖</button></td>
-        `;
-
-        table.appendChild(row);
-
-        const deleteBtn = row.querySelector(".deleteLesson");
-
-        deleteBtn.addEventListener("click", function ()
-        {
-            currentStudent.schedule =
-                currentStudent.schedule.filter(function(item)
-                {
-                    return !(
-                        item.day === day &&
-                        item.time === time &&
-                        item.lesson === lesson&&
-                        item.teacher === teacher
-                    );
-                });
-
-            localStorage.setItem(
-                "students",
-                JSON.stringify(students)
-            );
-
-            row.remove();
-        });
-
-        currentStudent.schedule.push({
-            day: day,
-            time: time,
-            lesson: lesson,
-            teacher: teacher
-        });
-
-        localStorage.setItem(
-            "students",
-            JSON.stringify(students)
-        );
+    currentStudent.schedule.push({
+        day,
+        time,
+        lesson,
+        teacher
     });
 
+    db.collection("students").doc(studentId).update({
+        schedule: currentStudent.schedule
+    }).then(() => {
+        loadSchedule();
+    });
+});
 
-    addExamBtn.addEventListener("click", function ()
-    {
-        const lesson = document.getElementById("examLesson").value;
-        const date = document.getElementById("examDate").value;
-        const time = document.getElementById("examTime").value;
-        const teacher = document.getElementById("examteacher").value;
 
-        if (
-            lesson.trim() === "" ||
-            date.trim() === "" ||
-            time.trim() === "" ||
-            teacher.trim() === ""
-        )
-        {
-            alert("همه فیلدها را پر کنید");
-            return;
-        }
 
-        const row = document.createElement("tr");
+addExamBtn.addEventListener("click", function () {
+    const lesson = document.getElementById("examLesson").value;
+    const date = document.getElementById("examDate").value;
+    const time = document.getElementById("examTime").value;
+    const teacher = document.getElementById("examteacher").value;
 
-        row.innerHTML = `
-            <td>${lesson}</td>
-            <td>${date}</td>
-            <td>${time}</td>
-            <td>${teacher}</td>
-            <td><button class="deleteExam">✖</button></td>
-        `;
+    if (!lesson || !date || !time || !teacher) {
+        alert("همه فیلدها را پر کنید");
+        return;
+    }
 
-        examTable.appendChild(row);
-
-        const deleteBtn = row.querySelector(".deleteExam");
-
-        deleteBtn.addEventListener("click", function ()
-        {
-            currentStudent.exams =
-                currentStudent.exams.filter(function(item)
-                {
-                    return !(
-                        item.lesson === lesson &&
-                        item.date === date &&
-                        item.time === time &&
-                        item.teacher === teacher
-                    );
-                });
-
-            localStorage.setItem(
-                "students",
-                JSON.stringify(students)
-            );
-
-            row.remove();
-        });
-
-        currentStudent.exams.push({
-            lesson: lesson,
-            date: date,
-            time: time,
-            teacher: teacher
-        });
-
-        localStorage.setItem(
-            "students",
-            JSON.stringify(students)
-        );
+    currentStudent.exams.push({
+        lesson,
+        date,
+        time,
+        teacher
     });
 
-    imageInput.addEventListener("change", function ()
-    {
-        const file = imageInput.files[0];
-
-        if (!file)
-        {
-            return;
-        }
-
-        const reader = new FileReader();
-
-        reader.onload = function ()
-        {
-            studentImage.src = reader.result;
-
-            currentStudent.image = reader.result;
-
-            localStorage.setItem(
-                "students",
-                JSON.stringify(students)
-            );
-        };
-
-        reader.readAsDataURL(file);
+    db.collection("students").doc(studentId).update({
+        exams: currentStudent.exams
+    }).then(() => {
+        loadExams();
     });
+});
+
+
+
+imageInput.addEventListener("change", function () {
+    const file = imageInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function () {
+        studentImage.src = reader.result;
+
+        currentStudent.image = reader.result;
+
+        db.collection("students").doc(studentId).update({
+            image: currentStudent.image
+        });
+    };
+
+    reader.readAsDataURL(file);
+});
 </script>
 
 </body>

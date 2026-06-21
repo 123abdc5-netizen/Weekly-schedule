@@ -1,37 +1,25 @@
 const addButton = document.getElementById("add_card");
 const container = document.querySelector(".cards-container");
-let students = JSON.parse(localStorage.getItem("students")) || [];
 
 
-function createCard(student)
-{
+
+function createCard(student, id) {
     const card = document.createElement("div");
+    card.classList.add("card");
 
     const deleteBtn = document.createElement("button");
     deleteBtn.innerText = "✖";
     deleteBtn.classList.add("delete-btn");
 
-    deleteBtn.addEventListener("click", function (event)
-    {
+    deleteBtn.addEventListener("click", function (event) {
         event.stopPropagation();
+
+        db.collection("students").doc(id).delete();
         card.remove();
-
-        students = students.filter(function(item)
-        {
-            return item.name !== student.name;
-        });
-
-        localStorage.setItem(
-            "students",
-            JSON.stringify(students)
-        );
     });
 
-
-    card.classList.add("card");
-    card.addEventListener("click", function ()
-    {
-        localStorage.setItem("selectedStudent", student.name);
+    card.addEventListener("click", function () {
+        localStorage.setItem("selectedStudent", id);
         window.location.href = "student_information.html";
     });
 
@@ -51,34 +39,22 @@ function createCard(student)
 }
 
 
+db.collection("students").get().then((snapshot) => {
+    snapshot.forEach((doc) => {
+        createCard(doc.data(), doc.id);
+    });
+});
 
-for (let student of students)
-{
-    createCard(student);
-}
 
-
-
-addButton.addEventListener("click", function ()
-{
+addButton.addEventListener("click", function () {
     const studentName = prompt("اسم دانشجو را وارد کنید:");
 
-    if (!studentName)
-    {
-        return;
-    }
+    if (!studentName) return;
 
-    students.push({
+    db.collection("students").add({
         name: studentName,
+        image: "default.png",
         schedule: [],
-        exams: [],
-        image: "default.png"
+        exams: []
     });
-
-    localStorage.setItem(
-        "students",
-        JSON.stringify(students)
-    );
-
-    createCard(students[students.length - 1]);
 });
